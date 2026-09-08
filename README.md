@@ -4,19 +4,20 @@ Aplikasi web sederhana untuk admin gudang yang mencatat barang, sales, pengambil
 
 ## Fitur
 
-- Dashboard ringkas dengan sidebar navigasi responsif:
-  - Total jenis barang, total stok unit, sales terdaftar, dan transaksi yang masih open.
+- Sidebar utama berisi Dashboard, Produk, dan Agent.
+- Dashboard ringkas:
+  - Total jenis produk, total stok unit, agent/sales terdaftar, dan transaksi yang masih open.
   - Ringkasan stok saat ini.
   - Daftar pengambilan sales yang belum diselesaikan.
   - Riwayat transaksi terbaru.
-- Master barang:
-  - Tambah barang dengan nama, SKU/kode opsional, satuan, harga jual, dan stok awal.
-  - Edit data barang.
-  - Hapus barang jika belum pernah dipakai transaksi.
-  - Lihat stok saat ini.
-- Master sales:
-  - Tambah, edit, dan hapus sales.
-  - Hapus sales hanya jika belum pernah dipakai transaksi.
+- Produk:
+  - Tabel nama produk, stok, jenis, satuan, harga, dan aksi CRUD.
+  - Tambah produk dengan nama, SKU/kode opsional, satuan, jenis, harga jual, dan stok awal.
+  - Edit data produk.
+  - Hapus produk jika belum pernah dipakai transaksi.
+- Agent:
+  - CRUD sales/agent.
+  - Ringkasan berdasarkan tanggal berisi nama sales, jumlah barang diambil, jumlah barang dikembalikan, jumlah uang yang disetor, dan jumlah transaksi.
 - Pengambilan barang:
   - Pilih sales dan beberapa barang sekaligus.
   - Validasi stok cukup di server.
@@ -47,7 +48,7 @@ http://localhost:8000
 ## Struktur file
 
 ```text
-index.php          Entry point, routing sederhana, form, sidebar, dashboard, dan UI Tailwind
+index.php          Entry point, routing sederhana, sidebar Dashboard/Produk/Agent, form, dan UI Tailwind
 app/storage.php    Helper baca/tulis JSON dengan file locking
 data/              Folder data runtime JSON, dibuat/diisi otomatis jika belum ada
 ```
@@ -55,8 +56,8 @@ data/              Folder data runtime JSON, dibuat/diisi otomatis jika belum ad
 File data runtime yang dibuat otomatis:
 
 ```text
-data/items.json          Data master barang dan stok saat ini
-data/sales.json          Data master sales
+data/items.json          Data master produk, jenis, dan stok saat ini
+data/sales.json          Data master sales/agent
 data/transactions.json   Data pengambilan, setoran/retur, dan status transaksi
 ```
 

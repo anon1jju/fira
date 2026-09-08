@@ -130,8 +130,41 @@ function has_transaction_sales(array $transactions, int $salesId): bool
     return false;
 }
 
+function agent_daily_summaries(array $transactions, array $sales): array
+{
+    $summaries = [];
+    foreach ($transactions as $transaction) {
+        $salesId = (int) ($transaction['sales_id'] ?? 0);
+        $date = substr((string) ($transaction['date'] ?? ''), 0, 10) ?: '-';
+        $key = $date . ':' . $salesId;
+        if (!isset($summaries[$key])) {
+            $summaries[$key] = [
+                'date' => $date,
+                'sales_id' => $salesId,
+                'sales_name' => sales_name($sales, $salesId),
+                'qty_taken' => 0.0,
+                'qty_returned' => 0.0,
+                'paid_amount' => 0.0,
+                'transactions' => 0,
+            ];
+        }
+
+        $summaries[$key]['transactions']++;
+        $summaries[$key]['paid_amount'] += (float) ($transaction['paid_amount'] ?? 0);
+        foreach ($transaction['items'] ?? [] as $item) {
+            $summaries[$key]['qty_taken'] += (float) ($item['qty_taken'] ?? 0);
+            $summaries[$key]['qty_returned'] += (float) ($item['qty_returned'] ?? 0);
+        }
+    }
+
+    usort($summaries, fn ($a, $b) => strcmp($b['date'], $a['date']) ?: strcmp($a['sales_name'], $b['sales_name']));
+    return $summaries;
+}
+
 $store = load_store();
 $page = $_GET['page'] ?? 'dashboard';
+$pageAliases = ['items' => 'products', 'sales' => 'agents'];
+$page = $pageAliases[$page] ?? $page;
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 try {
@@ -141,23 +174,25 @@ try {
             $name = post_string('name');
             $sku = post_string('sku');
             $unit = post_string('unit') ?: 'pcs';
+            $type = post_string('type') ?: '-';
             $price = post_float('price');
             $initialStock = post_float('stock');
 
             if ($name === '' || $price < 0 || ($id === 0 && $initialStock < 0)) {
                 flash('error', 'Nama, harga jual, dan stok awal wajib valid.');
-                redirect_to('items');
+                redirect_to('products');
             }
 
             if ($id > 0) {
                 $index = find_index_by_id($store['items'], $id);
                 if ($index < 0) {
                     flash('error', 'Barang tidak ditemukan.');
-                    redirect_to('items');
+                    redirect_to('products');
                 }
                 $store['items'][$index]['name'] = $name;
                 $store['items'][$index]['sku'] = $sku;
                 $store['items'][$index]['unit'] = $unit;
+                $store['items'][$index]['type'] = $type;
                 $store['items'][$index]['price'] = $price;
                 $store['items'][$index]['updated_at'] = now_id();
                 flash('success', 'Barang berhasil diperbarui.');
@@ -167,6 +202,7 @@ try {
                     'name' => $name,
                     'sku' => $sku,
                     'unit' => $unit,
+                    'type' => $type,
                     'price' => $price,
                     'stock' => $initialStock,
                     'created_at' => now_id(),
@@ -175,7 +211,7 @@ try {
                 flash('success', 'Barang berhasil ditambahkan.');
             }
             save_store($store);
-            redirect_to('items');
+            redirect_to('products');
         }
 
         if ($action === 'delete_item') {
@@ -188,7 +224,7 @@ try {
                 save_store($store);
                 flash('success', 'Barang berhasil dihapus.');
             }
-            redirect_to('items');
+            redirect_to('products');
         }
 
         if ($action === 'save_sales') {
@@ -197,14 +233,14 @@ try {
             $phone = post_string('phone');
             if ($name === '') {
                 flash('error', 'Nama sales wajib diisi.');
-                redirect_to('sales');
+                redirect_to('agents');
             }
 
             if ($id > 0) {
                 $index = find_index_by_id($store['sales'], $id);
                 if ($index < 0) {
                     flash('error', 'Sales tidak ditemukan.');
-                    redirect_to('sales');
+                    redirect_to('agents');
                 }
                 $store['sales'][$index]['name'] = $name;
                 $store['sales'][$index]['phone'] = $phone;
@@ -221,7 +257,7 @@ try {
                 flash('success', 'Sales berhasil ditambahkan.');
             }
             save_store($store);
-            redirect_to('sales');
+            redirect_to('agents');
         }
 
         if ($action === 'delete_sales') {
@@ -234,7 +270,7 @@ try {
                 save_store($store);
                 flash('success', 'Sales berhasil dihapus.');
             }
-            redirect_to('sales');
+            redirect_to('agents');
         }
 
         if ($action === 'create_pickup') {
@@ -353,13 +389,13 @@ try {
 }
 
 $editItem = null;
-if ($page === 'items' && isset($_GET['edit'])) {
+if ($page === 'products' && isset($_GET['edit'])) {
     $idx = find_index_by_id($store['items'], (int) $_GET['edit']);
     $editItem = $idx >= 0 ? $store['items'][$idx] : null;
 }
 
 $editSales = null;
-if ($page === 'sales' && isset($_GET['edit'])) {
+if ($page === 'agents' && isset($_GET['edit'])) {
     $idx = find_index_by_id($store['sales'], (int) $_GET['edit']);
     $editSales = $idx >= 0 ? $store['sales'][$idx] : null;
 }
@@ -368,11 +404,8 @@ function render_header(string $page): void
 {
     $menus = [
         'dashboard' => ['label' => 'Dashboard', 'icon' => '📊'],
-        'items' => ['label' => 'Barang', 'icon' => '📦'],
-        'sales' => ['label' => 'Sales', 'icon' => '👥'],
-        'pickup' => ['label' => 'Pengambilan', 'icon' => '🛒'],
-        'returns' => ['label' => 'Setoran/Retur', 'icon' => '💰'],
-        'transactions' => ['label' => 'Riwayat', 'icon' => '🧾'],
+        'products' => ['label' => 'Produk', 'icon' => '📦'],
+        'agents' => ['label' => 'Agent', 'icon' => '👥'],
     ];
     ?>
 <!doctype html>
@@ -460,7 +493,7 @@ function render_header(string $page): void
             <?php endforeach; ?>
         </nav>
         <div class="hidden border-t border-white/10 p-5 text-sm text-slate-400 lg:block">
-            Kelola stok, pengambilan sales, retur, dan setoran dari satu dashboard.
+            Sidebar utama: Dashboard, Produk, dan Agent.
         </div>
     </aside>
     <main class="flex-1 p-4 sm:p-6 lg:p-8">
@@ -490,12 +523,17 @@ if ($page === 'dashboard'):
         <section class="card span-3"><div class="muted">Total stok unit</div><div class="stat"><?= e(num(array_sum(array_map(fn ($i) => (float) ($i['stock'] ?? 0), $store['items'])))) ?></div></section>
         <section class="card span-3"><div class="muted">Sales terdaftar</div><div class="stat"><?= count($store['sales']) ?></div></section>
         <section class="card span-3"><div class="muted">Transaksi open</div><div class="stat"><?= count($openTransactions) ?></div></section>
+        <section class="card span-12">
+            <h2>Aksi cepat</h2>
+            <p class="muted">Menu utama di sidebar hanya Dashboard, Produk, dan Agent. Alur operasional tetap tersedia dari tombol berikut.</p>
+            <p class="actions mt-4"><a class="button" href="?page=pickup">Catat pengambilan</a><a class="button secondary" href="?page=returns">Input setoran/retur</a><a class="button light" href="?page=transactions">Lihat riwayat</a></p>
+        </section>
         <section class="card span-6">
             <h2>Ringkasan stok saat ini</h2>
-            <table><thead><tr><th>Barang</th><th>SKU</th><th>Stok</th><th>Harga</th></tr></thead><tbody>
+            <table><thead><tr><th>Produk</th><th>Jenis</th><th>Stok</th><th>Harga</th></tr></thead><tbody>
             <?php foreach ($store['items'] as $item): ?>
-                <tr><td><?= e($item['name']) ?></td><td><?= e($item['sku']) ?></td><td><?= e(num($item['stock'])) ?> <?= e($item['unit']) ?></td><td><?= e(money($item['price'])) ?></td></tr>
-            <?php endforeach; if ($store['items'] === []): ?><tr><td colspan="4" class="muted">Belum ada barang.</td></tr><?php endif; ?>
+                <tr><td><?= e($item['name']) ?></td><td><?= e($item['type'] ?? '-') ?></td><td><?= e(num($item['stock'])) ?> <?= e($item['unit']) ?></td><td><?= e(money($item['price'])) ?></td></tr>
+            <?php endforeach; if ($store['items'] === []): ?><tr><td colspan="4" class="muted">Belum ada produk.</td></tr><?php endif; ?>
             </tbody></table>
         </section>
         <section class="card span-6">
@@ -511,51 +549,68 @@ if ($page === 'dashboard'):
             <?php render_transactions_table($recent, $store); ?>
         </section>
     </div>
-<?php elseif ($page === 'items'): ?>
+<?php elseif ($page === 'products'): ?>
     <div class="grid">
         <section class="card span-4">
-            <h2><?= $editItem ? 'Edit barang' : 'Tambah barang' ?></h2>
+            <h2><?= $editItem ? 'Edit produk' : 'Tambah produk' ?></h2>
             <form method="post">
                 <input type="hidden" name="action" value="save_item">
                 <input type="hidden" name="id" value="<?= e($editItem['id'] ?? 0) ?>">
-                <label>Nama barang</label><input name="name" required value="<?= e($editItem['name'] ?? '') ?>">
+                <label>Nama produk</label><input name="name" required value="<?= e($editItem['name'] ?? '') ?>">
                 <label>SKU/kode (opsional)</label><input name="sku" value="<?= e($editItem['sku'] ?? '') ?>">
                 <label>Satuan</label><input name="unit" required value="<?= e($editItem['unit'] ?? 'pcs') ?>">
+                <label>Jenis</label><input name="type" required value="<?= e($editItem['type'] ?? '-') ?>">
                 <label>Harga jual per unit</label><input name="price" type="number" min="0" step="0.01" required value="<?= e($editItem['price'] ?? 0) ?>">
                 <?php if (!$editItem): ?><label>Stok awal</label><input name="stock" type="number" min="0" step="0.01" required value="0"><?php endif; ?>
-                <p class="actions"><button>Simpan</button><?php if ($editItem): ?><a class="button light" href="?page=items">Batal</a><?php endif; ?></p>
+                <p class="actions"><button>Simpan</button><?php if ($editItem): ?><a class="button light" href="?page=products">Batal</a><?php endif; ?></p>
             </form>
         </section>
         <section class="card span-8">
-            <h2>Master barang</h2>
-            <table><thead><tr><th>Nama</th><th>SKU</th><th>Satuan</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead><tbody>
+            <h2>Produk</h2>
+            <table><thead><tr><th>Nama produk</th><th>Stok</th><th>Jenis</th><th>Satuan</th><th>Harga</th><th>Aksi</th></tr></thead><tbody>
             <?php foreach ($store['items'] as $item): ?>
                 <tr>
-                    <td><?= e($item['name']) ?></td><td><?= e($item['sku']) ?></td><td><?= e($item['unit']) ?></td><td><?= e(money($item['price'])) ?></td><td><?= e(num($item['stock'])) ?></td>
-                    <td class="actions"><a class="button light" href="?page=items&edit=<?= e($item['id']) ?>">Edit</a><form method="post" onsubmit="return confirm('Hapus barang ini?')"><input type="hidden" name="action" value="delete_item"><input type="hidden" name="id" value="<?= e($item['id']) ?>"><button class="danger">Hapus</button></form></td>
+                    <td><?= e($item['name']) ?></td><td><?= e(num($item['stock'])) ?></td><td><?= e($item['type'] ?? '-') ?></td><td><?= e($item['unit']) ?></td><td><?= e(money($item['price'])) ?></td>
+                    <td class="actions"><a class="button light" href="?page=products&edit=<?= e($item['id']) ?>">Edit</a><form method="post" onsubmit="return confirm('Hapus barang ini?')"><input type="hidden" name="action" value="delete_item"><input type="hidden" name="id" value="<?= e($item['id']) ?>"><button class="danger">Hapus</button></form></td>
                 </tr>
-            <?php endforeach; if ($store['items'] === []): ?><tr><td colspan="6" class="muted">Belum ada barang.</td></tr><?php endif; ?>
+            <?php endforeach; if ($store['items'] === []): ?><tr><td colspan="6" class="muted">Belum ada produk.</td></tr><?php endif; ?>
             </tbody></table>
         </section>
     </div>
-<?php elseif ($page === 'sales'): ?>
+<?php elseif ($page === 'agents'): ?>
+    <?php $agentSummaries = agent_daily_summaries($store['transactions'], $store['sales']); ?>
     <div class="grid">
         <section class="card span-4">
-            <h2><?= $editSales ? 'Edit sales' : 'Tambah sales' ?></h2>
+            <h2><?= $editSales ? 'Edit agent' : 'Tambah agent' ?></h2>
             <form method="post">
                 <input type="hidden" name="action" value="save_sales">
                 <input type="hidden" name="id" value="<?= e($editSales['id'] ?? 0) ?>">
-                <label>Nama sales</label><input name="name" required value="<?= e($editSales['name'] ?? '') ?>">
+                <label>Nama sales/agent</label><input name="name" required value="<?= e($editSales['name'] ?? '') ?>">
                 <label>No. HP/catatan (opsional)</label><input name="phone" value="<?= e($editSales['phone'] ?? '') ?>">
-                <p class="actions"><button>Simpan</button><?php if ($editSales): ?><a class="button light" href="?page=sales">Batal</a><?php endif; ?></p>
+                <p class="actions mt-4"><button>Simpan</button><?php if ($editSales): ?><a class="button light" href="?page=agents">Batal</a><?php endif; ?></p>
             </form>
         </section>
         <section class="card span-8">
-            <h2>Master sales</h2>
-            <table><thead><tr><th>Nama</th><th>No. HP/catatan</th><th>Aksi</th></tr></thead><tbody>
+            <h2>Agent berdasarkan tanggal</h2>
+            <table><thead><tr><th>Tanggal</th><th>Nama sales</th><th>Jumlah barang diambil</th><th>Jumlah barang dikembalikan</th><th>Jumlah uang setor</th><th>Transaksi</th></tr></thead><tbody>
+            <?php foreach ($agentSummaries as $summary): ?>
+                <tr>
+                    <td><?= e($summary['date']) ?></td>
+                    <td><?= e($summary['sales_name']) ?></td>
+                    <td><?= e(num($summary['qty_taken'])) ?></td>
+                    <td><?= e(num($summary['qty_returned'])) ?></td>
+                    <td><?= e(money($summary['paid_amount'])) ?></td>
+                    <td><?= e($summary['transactions']) ?></td>
+                </tr>
+            <?php endforeach; if ($agentSummaries === []): ?><tr><td colspan="6" class="muted">Belum ada data pengambilan/setoran agent.</td></tr><?php endif; ?>
+            </tbody></table>
+        </section>
+        <section class="card span-12">
+            <h2>CRUD agent</h2>
+            <table><thead><tr><th>Nama sales</th><th>No. HP/catatan</th><th>CRUD</th></tr></thead><tbody>
             <?php foreach ($store['sales'] as $sales): ?>
-                <tr><td><?= e($sales['name']) ?></td><td><?= e($sales['phone']) ?></td><td class="actions"><a class="button light" href="?page=sales&edit=<?= e($sales['id']) ?>">Edit</a><form method="post" onsubmit="return confirm('Hapus sales ini?')"><input type="hidden" name="action" value="delete_sales"><input type="hidden" name="id" value="<?= e($sales['id']) ?>"><button class="danger">Hapus</button></form></td></tr>
-            <?php endforeach; if ($store['sales'] === []): ?><tr><td colspan="3" class="muted">Belum ada sales.</td></tr><?php endif; ?>
+                <tr><td><?= e($sales['name']) ?></td><td><?= e($sales['phone']) ?></td><td class="actions"><a class="button light" href="?page=agents&edit=<?= e($sales['id']) ?>">Edit</a><form method="post" onsubmit="return confirm('Hapus agent ini?')"><input type="hidden" name="action" value="delete_sales"><input type="hidden" name="id" value="<?= e($sales['id']) ?>"><button class="danger">Hapus</button></form></td></tr>
+            <?php endforeach; if ($store['sales'] === []): ?><tr><td colspan="3" class="muted">Belum ada agent.</td></tr><?php endif; ?>
             </tbody></table>
         </section>
     </div>
