@@ -1,10 +1,10 @@
 # Aplikasi Stok Gudang PHP JSON
 
-Aplikasi web sederhana untuk admin gudang yang mencatat barang, sales, pengambilan barang oleh sales, retur/sisa barang, dan uang setoran penjualan. Aplikasi ini memakai PHP native tanpa framework besar dan menyimpan data dalam file JSON.
+Aplikasi web sederhana untuk admin gudang yang mencatat barang, sales, pengambilan barang oleh sales, retur/sisa barang, dan uang setoran penjualan. Aplikasi ini memakai PHP native tanpa framework besar, Tailwind CSS untuk frontend, dan menyimpan data dalam file JSON.
 
 ## Fitur
 
-- Dashboard ringkas:
+- Dashboard ringkas dengan sidebar navigasi responsif:
   - Total jenis barang, total stok unit, sales terdaftar, dan transaksi yang masih open.
   - Ringkasan stok saat ini.
   - Daftar pengambilan sales yang belum diselesaikan.
@@ -47,7 +47,7 @@ http://localhost:8000
 ## Struktur file
 
 ```text
-index.php          Entry point, routing sederhana, form, dan tampilan UI
+index.php          Entry point, routing sederhana, form, sidebar, dashboard, dan UI Tailwind
 app/storage.php    Helper baca/tulis JSON dengan file locking
 data/              Folder data runtime JSON, dibuat/diisi otomatis jika belum ada
 ```
@@ -65,6 +65,7 @@ File JSON runtime di dalam `data/` diabaikan oleh Git agar data lokal tidak ikut
 ## Catatan teknis
 
 - Tidak menggunakan MySQL/PostgreSQL/SQLite.
+- Frontend menggunakan Tailwind CSS CDN sehingga tidak perlu proses build asset.
 - Output HTML disanitasi dengan `htmlspecialchars`.
 - Input utama divalidasi di server-side.
 - Penulisan JSON memakai lock file (`flock`) dan temporary file sebelum `rename` untuk mengurangi risiko file korup.

@@ -367,12 +367,12 @@ if ($page === 'sales' && isset($_GET['edit'])) {
 function render_header(string $page): void
 {
     $menus = [
-        'dashboard' => 'Dashboard',
-        'items' => 'Barang',
-        'sales' => 'Sales',
-        'pickup' => 'Pengambilan',
-        'returns' => 'Setoran/Retur',
-        'transactions' => 'Riwayat',
+        'dashboard' => ['label' => 'Dashboard', 'icon' => '📊'],
+        'items' => ['label' => 'Barang', 'icon' => '📦'],
+        'sales' => ['label' => 'Sales', 'icon' => '👥'],
+        'pickup' => ['label' => 'Pengambilan', 'icon' => '🛒'],
+        'returns' => ['label' => 'Setoran/Retur', 'icon' => '💰'],
+        'transactions' => ['label' => 'Riwayat', 'icon' => '🧾'],
     ];
     ?>
 <!doctype html>
@@ -381,57 +381,102 @@ function render_header(string $page): void
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Stok Gudang JSON</title>
-    <style>
-        :root { --primary:#2563eb; --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085; --border:#d9e2ef; --danger:#dc2626; --ok:#15803d; --warn:#b45309; }
-        * { box-sizing: border-box; }
-        body { margin:0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--text); }
-        header { background:linear-gradient(120deg, #1d4ed8, #0f766e); color:#fff; padding:22px; }
-        header h1 { margin:0 0 12px; font-size:24px; }
-        nav { display:flex; gap:8px; flex-wrap:wrap; }
-        nav a { color:#eaf2ff; text-decoration:none; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.14); }
-        nav a.active, nav a:hover { background:#fff; color:#1d4ed8; }
-        main { max-width:1180px; margin:0 auto; padding:22px; }
-        .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:16px; }
-        .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:0 8px 24px rgba(22,34,51,.05); }
-        .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-6 { grid-column: span 6; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
-        h2, h3 { margin-top:0; } .muted { color:var(--muted); } .stat { font-size:30px; font-weight:800; }
-        table { width:100%; border-collapse:collapse; margin-top:12px; }
-        th, td { padding:10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
-        th { font-size:13px; color:var(--muted); background:#f8fafc; }
-        input, select { width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; background:#fff; }
-        label { display:block; font-weight:700; margin:10px 0 6px; }
-        button, .button { display:inline-block; border:0; border-radius:10px; padding:10px 14px; background:var(--primary); color:white; text-decoration:none; cursor:pointer; font-weight:700; }
-        .button.secondary { background:#475569; } .button.danger, button.danger { background:var(--danger); } .button.light { background:#e2e8f0; color:#0f172a; }
-        .actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-        .flash { padding:12px 14px; border-radius:12px; margin-bottom:14px; border:1px solid; }
-        .flash.success { background:#ecfdf3; color:#166534; border-color:#bbf7d0; }
-        .flash.error { background:#fef2f2; color:#991b1b; border-color:#fecaca; }
-        .badge { display:inline-block; border-radius:999px; padding:4px 9px; font-size:12px; font-weight:800; }
-        .badge.open { background:#fff7ed; color:var(--warn); } .badge.closed { background:#ecfdf3; color:var(--ok); }
-        .row-form { display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:10px; }
-        .right { text-align:right; } .danger-text { color:var(--danger); } .ok-text { color:var(--ok); }
-        @media (max-width: 800px) { .span-3, .span-4, .span-6, .span-8 { grid-column: span 12; } table { display:block; overflow-x:auto; } main { padding:14px; } }
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        warehouse: {
+                            50: '#eff6ff',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#172033'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-slate-100 text-slate-900 antialiased; }
+            h2 { @apply text-xl font-bold text-slate-900; }
+            h3 { @apply mt-6 text-base font-bold text-slate-800; }
+            label { @apply mt-4 mb-1.5 block text-sm font-semibold text-slate-700; }
+            input, select { @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100; }
+            table { @apply mt-4 min-w-full divide-y divide-slate-200 text-sm; }
+            thead { @apply bg-slate-50; }
+            th { @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500; }
+            td { @apply border-b border-slate-100 px-4 py-3 align-top text-slate-700; }
+        }
+        @layer components {
+            .sidebar-link { @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white; }
+            .sidebar-link.active { @apply bg-white text-blue-700 shadow-lg shadow-blue-950/10; }
+            .grid { @apply grid grid-cols-1 gap-4 lg:grid-cols-12; }
+            .card { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70; }
+            .span-3 { @apply lg:col-span-3; }
+            .span-4 { @apply lg:col-span-4; }
+            .span-6 { @apply lg:col-span-6; }
+            .span-8 { @apply lg:col-span-8; }
+            .span-12 { @apply lg:col-span-12; }
+            .muted { @apply text-sm text-slate-500; }
+            .stat { @apply mt-2 text-3xl font-extrabold tracking-tight text-slate-900; }
+            .button, button { @apply inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100; }
+            .button.secondary { @apply bg-slate-600 hover:bg-slate-700; }
+            .button.danger, button.danger { @apply bg-red-600 hover:bg-red-700 focus:ring-red-100; }
+            .button.light { @apply bg-slate-100 text-slate-700 shadow-none hover:bg-slate-200 focus:ring-slate-100; }
+            .actions { @apply flex flex-wrap items-center gap-2; }
+            .flash { @apply mb-4 rounded-2xl border px-4 py-3 text-sm font-semibold; }
+            .flash.success { @apply border-emerald-200 bg-emerald-50 text-emerald-700; }
+            .flash.error { @apply border-red-200 bg-red-50 text-red-700; }
+            .badge { @apply inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold uppercase tracking-wide; }
+            .badge.open { @apply bg-amber-100 text-amber-700; }
+            .badge.closed { @apply bg-emerald-100 text-emerald-700; }
+            .row-form { @apply mb-3 grid grid-cols-1 gap-3 md:grid-cols-[2fr_1fr]; }
+            .right { @apply text-right; }
+            .danger-text { @apply text-red-600; }
+            .ok-text { @apply text-emerald-700; }
+        }
     </style>
 </head>
 <body>
-<header>
-    <h1>Stok Gudang JSON</h1>
-    <nav>
-        <?php foreach ($menus as $key => $label): ?>
-            <a class="<?= $page === $key ? 'active' : '' ?>" href="?page=<?= e($key) ?>"><?= e($label) ?></a>
+<div class="min-h-screen lg:flex">
+    <aside class="bg-slate-950 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-72 lg:flex-col">
+        <div class="bg-gradient-to-br from-blue-600 to-teal-600 p-6 lg:bg-none">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-2xl shadow-inner">🏬</div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight">Stok Gudang</h1>
+                    <p class="text-sm text-blue-100 lg:text-slate-400">PHP + JSON Storage</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex gap-2 overflow-x-auto p-4 lg:flex-1 lg:flex-col lg:overflow-visible">
+            <?php foreach ($menus as $key => $menu): ?>
+                <a class="sidebar-link <?= $page === $key ? 'active' : '' ?>" href="?page=<?= e($key) ?>">
+                    <span><?= e($menu['icon']) ?></span><span class="whitespace-nowrap"><?= e($menu['label']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+        <div class="hidden border-t border-white/10 p-5 text-sm text-slate-400 lg:block">
+            Kelola stok, pengambilan sales, retur, dan setoran dari satu dashboard.
+        </div>
+    </aside>
+    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        <div class="mb-6 rounded-3xl bg-gradient-to-r from-blue-600 to-teal-600 p-6 text-white shadow-lg shadow-blue-200">
+            <p class="text-sm font-semibold uppercase tracking-wide text-blue-100">Dashboard Admin Gudang</p>
+            <h2 class="mt-1 text-2xl font-extrabold text-white">Pantau stok dan transaksi sales harian</h2>
+        </div>
+        <?php foreach (flashes() as $message): ?>
+            <div class="flash <?= e($message['type']) ?>"><?= e($message['message']) ?></div>
         <?php endforeach; ?>
-    </nav>
-</header>
-<main>
-    <?php foreach (flashes() as $message): ?>
-        <div class="flash <?= e($message['type']) ?>"><?= e($message['message']) ?></div>
-    <?php endforeach; ?>
     <?php
 }
 
 function render_footer(): void
 {
-    echo '</main></body></html>';
+    echo '</main></div></body></html>';
 }
 
 render_header($page);
