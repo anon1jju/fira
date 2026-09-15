@@ -1,0 +1,90 @@
+[
+    {
+        "id": 1,
+        "nama": "HS SLIM ORIGINAL",
+        "kategori": "-",
+        "stok": 50,
+        "harga_per_pcs": 28500,
+        "created_at": "2026-09-08 15:59:30"
+    },
+    {
+        "id": 2,
+        "nama": "HS SLIM MENTHOL",
+        "kategori": "-",
+        "stok": 112,
+        "harga_per_pcs": 28500,
+        "created_at": "2026-09-08 16:01:00"
+    },
+    {
+        "id": 3,
+        "nama": "HS SLIM FRESMINT",
+        "kategori": "-",
+        "stok": 138,
+        "harga_per_pcs": 33500,
+        "created_at": "2026-09-08 16:01:19"
+    },
+    {
+        "id": 4,
+        "nama": "HS SLIM PURPLE",
+        "kategori": "-",
+        "stok": 111,
+        "harga_per_pcs": 33500,
+        "created_at": "2026-09-08 16:01:43"
+    },
+    {
+        "id": 5,
+        "nama": "HS KRETEK 12",
+        "kategori": "-",
+        "stok": 260,
+        "harga_per_pcs": 9000,
+        "created_at": "2026-09-08 16:02:20"
+    },
+    {
+        "id": 6,
+        "nama": "HS FILTER 12",
+        "kategori": "-",
+        "stok": 60,
+        "harga_per_pcs": 16800,
+        "created_at": "2026-09-08 16:37:02"
+    },
+    {
+        "id": 7,
+        "nama": "HS MILD ORIGINAL",
+        "kategori": "-",
+        "stok": 80,
+        "harga_per_pcs": 25500,
+        "created_at": "2026-09-08 16:37:28"
+    },
+    {
+        "id": 8,
+        "nama": "HS MILD MANGGO",
+        "kategori": "-",
+        "stok": 133,
+        "harga_per_pcs": 25500,
+        "created_at": "2026-09-08 16:37:44"
+    },
+    {
+        "id": 9,
+        "nama": "HS MILD PURPLE",
+        "kategori": "-",
+        "stok": 0,
+        "harga_per_pcs": 25500,
+        "created_at": "2026-09-08 16:38:00"
+    },
+    {
+        "id": 10,
+        "nama": "HS DOUBLE CLICK",
+        "kategori": "-",
+        "stok": 40,
+        "harga_per_pcs": 33500,
+        "created_at": "2026-09-08 16:38:33"
+    },
+    {
+        "id": 11,
+        "nama": "HS MACHA",
+        "kategori": "-",
+        "stok": 0,
+        "harga_per_pcs": 10500,
+        "created_at": "2026-09-08 16:38:49"
+    }
+]

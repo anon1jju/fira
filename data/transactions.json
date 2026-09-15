@@ -1,0 +1,88 @@
+[
+    {
+        "id": 1,
+        "tanggal": "2026-09-13",
+        "sales_id": 1,
+        "nama_sales": "Agus",
+        "hp_sales": "08535456456",
+        "items": [
+            {
+                "item_id": 2,
+                "nama_produk": "HS SLIM MENTHOL",
+                "kategori": "-",
+                "jumlah": 15,
+                "harga_per_pcs": 28500,
+                "subtotal": 427500,
+                "stok_sebelum": 105,
+                "stok_sesudah": 90
+            }
+        ],
+        "total_qty": 15,
+        "total_nilai": 427500,
+        "created_at": "2026-09-13 17:57:57"
+    },
+    {
+        "id": 2,
+        "tanggal": "2026-09-13",
+        "sales_id": 1,
+        "nama_sales": "Agus",
+        "hp_sales": "08535456456",
+        "items": [
+            {
+                "item_id": 1,
+                "nama_produk": "HS SLIM ORIGINAL",
+                "kategori": "-",
+                "jumlah": 10,
+                "harga_per_pcs": 28500,
+                "subtotal": 285000,
+                "stok_sebelum": 45,
+                "stok_sesudah": 35
+            }
+        ],
+        "total_qty": 10,
+        "total_nilai": 285000,
+        "created_at": "2026-09-13 18:05:54"
+    },
+    {
+        "id": 3,
+        "tanggal": "2026-09-13",
+        "sales_id": 2,
+        "nama_sales": "Sofyan",
+        "hp_sales": "0853646364",
+        "items": [
+            {
+                "item_id": 2,
+                "nama_produk": "HS SLIM MENTHOL",
+                "kategori": "-",
+                "jumlah": 15,
+                "harga_per_pcs": 28500,
+                "subtotal": 427500,
+                "stok_sebelum": 90,
+                "stok_sesudah": 75
+            },
+            {
+                "item_id": 4,
+                "nama_produk": "HS SLIM PURPLE",
+                "kategori": "-",
+                "jumlah": 16,
+                "harga_per_pcs": 33500,
+                "subtotal": 536000,
+                "stok_sebelum": 109,
+                "stok_sesudah": 93
+            },
+            {
+                "item_id": 5,
+                "nama_produk": "HS KRETEK 12",
+                "kategori": "-",
+                "jumlah": 12,
+                "harga_per_pcs": 9000,
+                "subtotal": 108000,
+                "stok_sebelum": 270,
+                "stok_sesudah": 258
+            }
+        ],
+        "total_qty": 43,
+        "total_nilai": 1071500,
+        "created_at": "2026-09-13 18:14:10"
+    }
+]

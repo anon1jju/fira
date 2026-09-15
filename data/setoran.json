@@ -1,0 +1,75 @@
+[
+    {
+        "id": 1,
+        "transaction_id": 1,
+        "sales_id": 1,
+        "nama_sales": "bg ame",
+        "tanggal_setor": "2026-09-08",
+        "items": [
+            {
+                "item_id": 11,
+                "nama_produk": "HS MACHA",
+                "diambil": 10,
+                "dikembalikan": 5,
+                "terjual": 5,
+                "harga_per_pcs": 10500,
+                "subtotal": 52500
+            },
+            {
+                "item_id": 9,
+                "nama_produk": "HS MILD PURPLE",
+                "diambil": 10,
+                "dikembalikan": 0,
+                "terjual": 10,
+                "harga_per_pcs": 25500,
+                "subtotal": 255000
+            }
+        ],
+        "total_terjual": 15,
+        "total_expected": 307500,
+        "uang_disetor": 307500,
+        "kurang": 0,
+        "status": "lunas",
+        "created_at": "2026-09-08 17:22:16",
+        "riwayat_cicilan": [
+            {
+                "tanggal": "2026-09-08 17:29:42",
+                "jumlah": 25000
+            },
+            {
+                "tanggal": "2026-09-08 17:33:10",
+                "jumlah": 27500
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "transaction_id": 2,
+        "sales_id": 1,
+        "nama_sales": "Agus",
+        "tanggal_setor": "2026-09-13",
+        "items": [
+            {
+                "item_id": 1,
+                "nama_produk": "HS SLIM ORIGINAL",
+                "diambil": 10,
+                "dikembalikan": 1,
+                "terjual": 9,
+                "harga_per_pcs": 28500,
+                "subtotal": 256500
+            }
+        ],
+        "total_terjual": 9,
+        "total_expected": 256500,
+        "uang_disetor": 230000,
+        "kurang": 26500,
+        "status": "hutang",
+        "created_at": "2026-09-13 18:08:09",
+        "riwayat_cicilan": [
+            {
+                "tanggal": "2026-09-13 18:10:06",
+                "jumlah": 30000
+            }
+        ]
+    }
+]
